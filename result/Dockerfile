@@ -1,20 +1,12 @@
-# Use official Node.js image as the base image
 FROM node:latest
 
-# Set working directory inside the container
 WORKDIR /usr/local/app
-
-# Copy package.json and package-lock.json to container
 COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application code to the container
+RUN npm ci
+RUN npm install -g nodemon
+RUN npm cache clean --force
+RUN mv /usr/local/app/node_modules /node_modules
 COPY . .
-
-# Expose port 4000 for the Node.js application
 EXPOSE 4000
-
-# Wait for PostgreSQL to be ready before starting the Node.js application
+ENV PORT=4000
 CMD ["node", "server.js"]
