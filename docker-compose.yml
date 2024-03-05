@@ -39,6 +39,7 @@ services:
     build: ./seed-data
     depends_on:
       - db
+      - nginx
     networks:
       - frontend
 
