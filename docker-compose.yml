@@ -6,17 +6,28 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - vote
+      - vote1
+      - vote2
       - result
     networks:
       - front-net
 
-  vote:
+  vote1:
     build: ./vote
     environment:
       - REDIS_HOST=redis
     ports:
       - "5000:5000"
+    depends_on:
+      - redis
+    networks:
+      - front-net
+      - back-net
+
+  vote2:
+    build: ./vote
+    environment:
+      - REDIS_HOST=redis
     depends_on:
       - redis
     networks:
