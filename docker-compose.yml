@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   nginx:
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/nginx
     build: ./nginx
     ports:
       - "80:80"
@@ -13,6 +14,7 @@ services:
       - front-net
 
   vote1:
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote1
     build: ./vote
     environment:
       - REDIS_HOST=redis
@@ -25,6 +27,7 @@ services:
       - back-net
 
   vote2:
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote2
     build: ./vote
     environment:
       - REDIS_HOST=redis
@@ -35,6 +38,7 @@ services:
       - back-net
 
   result:
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/result
     build: ./result
     environment:
       - DB_HOST=db
@@ -47,6 +51,7 @@ services:
       - back-net
 
   seed:
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/seed
     build: ./seed-data
     depends_on:
       - db
@@ -55,6 +60,7 @@ services:
       - front-net
 
   worker:
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/worker
     build:
       context: ./worker
       dockerfile: Dockerfile
