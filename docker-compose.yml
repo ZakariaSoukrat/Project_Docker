@@ -14,7 +14,7 @@ services:
       - front-net
 
   vote1:
-    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote1
+    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote
     build: ./vote
     environment:
       - REDIS_HOST=redis
@@ -27,7 +27,6 @@ services:
       - back-net
 
   vote2:
-    image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote2
     build: ./vote
     environment:
       - REDIS_HOST=redis
