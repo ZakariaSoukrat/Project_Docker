@@ -9,7 +9,7 @@ services:
       - vote
       - result
     networks:
-      - frontend
+      - front-net
 
   vote:
     build: ./vote
@@ -20,8 +20,8 @@ services:
     depends_on:
       - redis
     networks:
-      - frontend
-      - backend
+      - front-net
+      - back-net
 
   result:
     build: ./result
@@ -32,8 +32,8 @@ services:
     depends_on:
       - db
     networks:
-      - frontend
-      - backend
+      - front-net
+      - back-net
 
   seed:
     build: ./seed-data
@@ -41,7 +41,7 @@ services:
       - db
       - nginx
     networks:
-      - frontend
+      - front-net
 
   worker:
     build: ./worker
@@ -52,12 +52,15 @@ services:
       - redis
       - db
     networks:
-      - backend
+      - back-net
 
   redis:
     image: redis:latest
+    #volumes:
+     # - ./healthchecks:/healthchecks
+    #command: ["sh", "/healthchecks/redis.sh"]
     networks:
-      - backend
+      - back-net
 
   db:
     image: postgres:latest
@@ -65,14 +68,16 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=votes
     volumes:
+      #- ./healthchecks:/healthchecks
       - db-data:/var/lib/postgresql/data
+    #command: ["/bin/bash", "/healthchecks/postgres.sh"]
     networks:
-      - backend
+      - back-net
 
 volumes:
   db-data:
 
 networks:
-  frontend:
-  backend:
+  front-net:
+  back-net:
     driver: bridge

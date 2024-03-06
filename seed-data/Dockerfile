@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9-slim-buster
 
 WORKDIR /app
 
@@ -9,6 +9,6 @@ RUN apt-get update \
     && dos2unix generate-votes.sh \
     && pip install urllib3
 
-CMD python make-data.py && chmod +x ./generate-votes.sh && ./generate-votes.sh; tail -f /dev/null
+CMD python make-data.py && chmod +x ./generate-votes.sh && ./generate-votes.sh
 
 #remove tail - f /dev/null to let the container shut after completing the task
