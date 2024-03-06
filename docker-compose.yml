@@ -58,10 +58,6 @@ services:
     build:
       context: ./worker
       dockerfile: Dockerfile
-      args:
-        TARGETPLATFORM: 'linux/amd64' 
-        TARGETARCH: 'amd64' 
-        BUILDPLATFORM: 'linux/amd64'
     environment:
       - REDIS_HOST=redis
       - DB_HOST=db
