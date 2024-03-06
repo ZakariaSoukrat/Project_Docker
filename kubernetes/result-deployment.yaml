@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         name: result
-      - image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/result1
+      - image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/result
         ports:
         - containerPort: 4000
           name: result
