@@ -5,7 +5,7 @@ metadata:
   labels:
     app: result
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: result
@@ -18,5 +18,5 @@ spec:
       - image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/result
         name: result
         ports:
-        - containerPort: 4000
+        - containerPort: 80
           name: result
