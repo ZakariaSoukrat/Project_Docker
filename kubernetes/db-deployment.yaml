@@ -28,6 +28,16 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: db-data
+          subPath: data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /healthchecks/postgres.sh
+          initialDelaySeconds: 15
+          periodSeconds: 10
       volumes:
       - name: db-data
-        emptyDir: {} 
+        persistentVolumeClaim:
+          claimName: db-data-pvc

@@ -18,5 +18,9 @@ spec:
       - image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote
         name: vote
         ports:
-        - containerPort: 80
+        - containerPort: 5000
           name: vote
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5001

@@ -23,6 +23,14 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: redis-data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - /healthchecks/redis.sh
+          initialDelaySeconds: 15
+          periodSeconds: 10
       volumes:
       - name: redis-data
-        emptyDir: {} 
+        emptyDir: {}
