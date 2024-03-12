@@ -1,120 +1,58 @@
-# Docker project
+# Application Deployment Using Docker Compose
 
-The goal of the project is to deploy the following application by using Docker and Docker compose. You will give us a GitHub or Gitlab link for your project.
+## Overview
 
-![image](login-nuage-voting.drawio.svg)
+This guide outlines the steps to deploy the voting application using Docker Compose. Our application architecture is designed for scalability and ease of deployment, as illustrated below:
 
-## Mandatory version
-- one Dockerfile per service that exposes the internal port of the container
-- one docker-compose.yml file to deploy the stack
-- adequate `depends_on`
-- two networks will be defined: `front-net` and `back-net`
-- a README file explaining how to configure and deploy the stack
+![Application Architecture](login-nuage-voting.drawio.svg)
 
-## Optional extended version
-- healthchecks on vote, redis and db services (some scripts are given in `healthcheck` directory)
-- reducing the size of images
-- multistage build on the worker service (.NET)
+## Prerequisites
 
+- Docker and Docker Compose installed on your system
+- Basic understanding of Docker concepts
 
-## Some elements
+## Deployment Steps
 
-The base image will contain the basic tools for the language the application is written in.
-You should use a tag to specify which version of the image you want to pull.
-For building purposes, it is good practice to use a `slim` version of the image.
-e.g. for Python `python:3.13-rc-slim`, for Node.js `node:18-slim`
+1. **Clone the Repository**  
+   Clone this repository to your local system to get started with the deployment.
+   ```
+   git clone https://github.com/ZakariaSoukrat/Project_Docker.git
+   cd Project_Docker
+   ```
 
+2. **Navigate to the Deployment Branch**  
+   Make sure you're on the correct branch that contains the Docker Compose setup.
+   ```
+   git checkout Partie_Docker
+   ```
 
-### `vote` service
+3. **Deploy Using Docker Compose**  
+   Use Docker Compose to deploy the application components. This command will build and start all the services defined in `docker-compose.yml`.
+   ```
+   docker-compose up -d
+   ```
 
-This is a Python web server using the Flask framework. It presents a front-end for the user to submit their votes, then write them into the Redis key-value store.
+4. **Verify the Deployment**  
+   After deploying, you can verify that all services are up and running by executing:
+   ```
+   docker-compose ps
+   ```
 
-For building the Dockerfile, before starting `app.py`:
-- requirements have to be copied and installed in the container
-- all necessary files and directories have to be copied in the container
+## Components
 
-Port mapping:
-`5000` is used inside the container (see Python code). Each instance of vote will use the external port `500x` where `x` is the instance number
+The application is composed of the following services:
 
-### `result` service
+- **Vote**: A front-end web application for collecting votes.
+- **Worker**: A .NET worker that processes votes and stores them.
+- **Result**: A Node.js web application that displays the voting results.
+- **Redis**: An in-memory database used as a temporary store for the votes.
+- **DB**: A PostgreSQL database used for storing the processed votes.
+- **Nginx**: A reverse proxy to route requests to the appropriate service.
 
-This is a Node.js web server. The front-end presents the results of the votes. The result values are taken from the PostgreSQL database.
+## Architecture Diagram
 
-In the Dockerfile, before running the code:
-- copy package files into the container,
-- install `nodemon` with `npm install -g nodemon`
-- install more requirements:
-```
-npm ci
-npm cache clean --force
-mv /usr/local/app/node_modules /node_modules
-```
-- set the `PORT` environment variable
+The architecture diagram embedded at the beginning of this README provides a visual overview of how the components interact with each other.
 
-Finally, run the code with `node server.js`.
+## Conclusion
 
-
-### `seed` service
-
-This is a Python and bash program used to virtually send many vote requests to the `vote` server.
-
-First the file `make-data.py` has to be executed in the container. Second, the file `generate-votes.sh` has to be executed when starting the container.
-
-For benchmarking, `generate-votes.sh` uses the `ab` utility which needs to be installed, through the `apache2-utils` `apt` package.
-
-### `worker` service
-
-This is a .NET (C#) program that reads vote submissions from Redis store, compute the result and store it in the PostgreSQL database.
-
-It requires a little bit more work to compile and run:
-- use this as a base image
-```
-mcr.microsoft.com/dotnet/sdk:7.0
-```
-  with the argument `--platform=${BUILDPLATFORM}`
-- use `ARG` to define build arguments `TARGETPLATFORM`, `TARGETARCH` and `BUILDPLATFORM`. Print their values with `echo`.
-- in the `source/` directory, copy all worker files form this repo and run
-```
-dotnet restore -a $TARGETARCH
-dotnet publish -c release -o /app -a $TARGETARCH --self-contained false --no-restore
-```
-The application will be built inside the `/app` directory, launch with `dotnet Worker.dll`.
-
-For the multistage build, use this image: `mcr.microsoft.com/dotnet/runtime:7.0`.
-
-
-### Redis service
-
-This is a simple Redis service. Redis is a NOSQL database software focused on availability used for storing large volumes of data-structures (typically key-value pairs).
-
-In order to perform healthchecks while Redis is running, there must be a volume attached to the container. You will need to mount local the repo directory `./healthchecks/` into the `/healthchecks/` directory of the container.
-
-The check is done by executing the `redis.sh` script which uses the `curl` package.
-
-
-### PostgreSQL database service
-
-This is a simple PostgreSQL service.
-
-The same logic applies for healthchecks, mount a volume, use `postgres.sh` for checks and install `curl`.
-
-Moreover, in order to persist the data that comes from the votes, you need to create a Docker volume and attach it to the container.
-The volume will be named `db-data` and attached to the `/var/lib/postgresql/data` directory inside the container.
-
-### Nginx loadbalancer service
-
-This is a simple Nginx service. At its core, Nginx is a web-server but it can also be used for other purposes such as loadbalancing, HTTP cache, reverse proxy, etc.
-
-To configure Nginx as a loadbalancer (LB), you first need to edit accordingly the `./nginx/nginx.conf` file from this repo.
-Then in the Dockerfile:
-- remove the default Nginx configuration located at `/etc/nginx/conf.d/default.conf`,
-- copy `./nginx/nginx.conf` into the container at the above location.
-
-
-### Networking
-
-* The Redis store, the `worker` service and the PostgreSQL database are only available inside the `back-tier` network.
-* The `vote` and `result` services are on both the `front-tier` and `back-tier` network in order to (1) expose the frontend to users, and (2) communicate with the databases.
-* Finally, the `seed` and Nginx loadbalancer are on the `front-tier`.
-
-# Kubernetes project
+Following these steps will deploy the application across multiple containers, allowing for a scalable and manageable setup. For additional configuration options or troubleshooting, refer to the official Docker and Docker Compose documentation.
