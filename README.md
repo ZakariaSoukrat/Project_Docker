@@ -48,6 +48,12 @@ The application is composed of the following services:
 - **Redis**: An in-memory database used as a temporary store for the votes.
 - **DB**: A PostgreSQL database used for storing the processed votes.
 - **Nginx**: A reverse proxy to route requests to the appropriate service.
+- **Seed**: A service that automatically injects votes into the system for demonstration purposes.
+
+## Accessing the Application
+
+- **Vote Page**: After deployment, you can access the Vote page at http://localhost:5000. This page allows users to submit their votes.
+- **Result Page**: The Result page can be accessed at http://localhost:5001, where you can see the voting results in real-time.
 
 ## Architecture Diagram
 
