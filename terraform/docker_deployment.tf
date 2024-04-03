@@ -15,14 +15,11 @@ provider "docker" {
 resource "docker_container" "nginx" {
   name  = "nginx_container"
   image = "europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/nginx"
-  build {
-    context = "./nginx"
-  }
   ports {
     internal = 80
     external = 80
   }
-  depends_on = ["vote1", "vote2", "result"]
+  depends_on = ["docker_container.vote1", "docker_container.vote2", "docker_container.result"]
   networks_advanced {
     name = "front-net"
   }
@@ -31,15 +28,11 @@ resource "docker_container" "nginx" {
 resource "docker_container" "vote1" {
   name  = "vote1_container"
   image = "europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote"
-  build {
-    context = "./vote"
-  }
-  environment = ["REDIS_HOST=redis"]
   ports {
     internal = 5000
     external = 5000
   }
-  depends_on = ["redis"]
+  depends_on = ["docker_container.redis"]
   networks_advanced {
     name = "front-net"
   }
@@ -50,11 +43,8 @@ resource "docker_container" "vote1" {
 
 resource "docker_container" "vote2" {
   name  = "vote2_container"
-  build {
-    context = "./vote"
-  }
-  environment = ["REDIS_HOST=redis"]
-  depends_on = ["redis"]
+  image = "europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/vote"  # Replace with your actual image name
+  depends_on = ["docker_container.redis"]
   networks_advanced {
     name = "front-net"
   }
@@ -66,15 +56,11 @@ resource "docker_container" "vote2" {
 resource "docker_container" "result" {
   name  = "result_container"
   image = "europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/result"
-  build {
-    context = "./result"
-  }
-  environment = ["DB_HOST=db"]
   ports {
     internal = 4000
     external = 4000
   }
-  depends_on = ["db"]
+  depends_on = ["docker_container.db"]
   networks_advanced {
     name = "front-net"
   }
@@ -85,11 +71,8 @@ resource "docker_container" "result" {
 
 resource "docker_container" "seed" {
   name  = "seed_container"
-  image = "europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/seed"
-  build {
-    context = "./seed-data"
-  }
-  depends_on = ["db", "nginx"]
+  image = "your_image_name"  # Replace with your actual image name
+  depends_on = ["docker_container.db", "docker_container.nginx"]
   networks_advanced {
     name = "front-net"
   }
@@ -97,13 +80,8 @@ resource "docker_container" "seed" {
 
 resource "docker_container" "worker" {
   name  = "worker_container"
-  image = "europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/worker"
-  build {
-    context    = "./worker"
-    dockerfile = "Dockerfile"
-  }
-  environment = ["REDIS_HOST=redis", "DB_HOST=db"]
-  depends_on = ["redis", "db"]
+  image = "your_image_name"  # Replace with your actual image name
+  depends_on = ["docker_container.redis", "docker_container.db"]
   networks_advanced {
     name = "back-net"
   }
@@ -114,7 +92,7 @@ resource "docker_container" "redis" {
   image = "redis:latest"
   volumes {
     container_path = "/healthchecks"
-    host_path      = "./healthchecks"
+    host_path      = "/absolute/path/to/healthchecks"
     read_only      = true
   }
   healthcheck {
@@ -131,15 +109,14 @@ resource "docker_container" "redis" {
 resource "docker_container" "db" {
   name  = "db_container"
   image = "postgres:latest"
-  environment = ["POSTGRES_PASSWORD=postgres", "POSTGRES_DB=votes"]
   volumes {
     container_path = "/healthchecks"
-    host_path      = "./healthchecks"
+    host_path      = "/absolute/path/to/healthchecks"
     read_only      = true
   }
   volumes {
     container_path = "/var/lib/postgresql/data"
-    host_path      = "db-data"
+    host_path      = "/absolute/path/to/db-data"  # Provide the absolute path to where you want to persist PostgreSQL data
   }
   healthcheck {
     test     = ["CMD", "sh", "/healthchecks/postgres.sh"]
