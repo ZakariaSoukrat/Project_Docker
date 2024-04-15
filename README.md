@@ -1,76 +1,71 @@
-# Running Our Application on Google Cloud with Kubernetes
 
-This guide walks you through deploying our application to Google Cloud using Kubernetes. Ensure you have [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed on your machine before proceeding.
 
-## Prerequisites
+## Instructions
 
-- Google Cloud account
-- Google Cloud SDK installed
-- kubectl installed
-- Docker images of our application
+### 1. Docker Compose Part
 
-## Authentication & Configuration
-
-1. **Authenticate with Google Cloud:**  
-   Start by authenticating your Google Cloud CLI with your Google account. Open a terminal and run:
-   ```
-   gcloud auth login
-   ```
-   Follow the prompts to authenticate.
-
-2. **Set your Google Cloud project:**  
-   Configure `gcloud` to use your project with:
-   ```
-   gcloud config set project login-k8s-416409
+1. Run the following command to start Docker Compose:
+   ```bash
+   docker-compose up -d
    ```
 
-## Create and Configure Kubernetes Cluster
+2. Access the services at:
+   - vote http://localhost:4000
+   -  result http://localhost:5000
 
-1. **Create a Kubernetes cluster:**  
-   Use the following command to create a Kubernetes cluster named `votekube`. This cluster has 3 nodes of type `n1-standard-2` in the `europe-west9` zone.
-   ```
-   gcloud container clusters create votekube --machine-type n1-standard-2 --num-nodes 3 --zone europe-west9
-   ```
-   Alternatively, you can change the `--zone` parameter to deploy in a different region, such as `us-central1-c`.
+### 2. Kubernetes Part
 
-2. **Get cluster credentials:**  
-   To interact with your newly created cluster, get the credentials and configure `kubectl` using:
-   ```
-   gcloud container clusters get-credentials votekube --zone europe-west9  --project login-k8s-416409
-   ```
+1. Before proceeding, ensure you have created a registry and a cluster in GCP.
 
-## Deploying the Application
+2. Update the URLs of the images in the `docker-compose.yaml` file to match your registry URL.
 
-1. **Deploy your Kubernetes configurations:**  
-   Navigate to the directory containing your Kubernetes configuration files and apply them:
-   ```
-   kubectl apply -f ./kubernetes/
+3. Authenticate to the registry:
+   ```bash
+   gcloud auth configure-docker europe-west9-docker.pkg.dev
    ```
 
-2. **Verify the services are running:**  
-   To ensure your application services are up and running, check the service status with:
+4. Update the following files in the `kubernetes` directory with the new image URLs.
+
+5. Build and push Docker Compose images:
+   ```bash
+   docker-compose build
+   docker-compose push
    ```
-   kubectl get svc
+
+6. Apply Kubernetes configurations:
+   ```bash
+   kubectl apply -f kubernetes/
    ```
 
-## Accessing the Application
+7. To access the services, run:
+   ```bash
+   kubectl get services
+   ```
 
-- **Voting Page:** The application's voting interface is available at [http://34.28.238.188:5001/](http://34.28.238.188:5001/).
+### 3. Terraform Part
 
-- **Results Page:** To view voting results, visit [http://34.123.46.22:4001/](http://34.123.46.22:4001/).
+#### Part 1: Docker
 
-## Cleaning Up
+1. Navigate to the `terraform/docker` directory.
 
-To avoid incurring charges in Google Cloud, remember to delete the cluster after use:
-```
-gcloud container clusters delete votekube --zone europe-west9
-```
-Or specify a different zone if you created the cluster in another region.
+2. Fill `variables.auto.tfvars` with the absolute path to the root project.
 
-## Infrastructure Overview
+3. Run the following commands:
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
 
-![image](login-nuage-voting-k8s.drawio.svg)
+#### Part 2: Kubernetes
 
----
+1. Fill in the variable values in `/terraform/kubernetes/terraform.tfvars`, including the path to your credentials JSON and your project ID.
 
-Replace the IP addresses with the actual IPs of your deployed services, and adjust any paths or names as necessary for your project. This README provides a basic framework and can be extended with more specific details about your application as needed.
+2. Run the following commands:
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+##

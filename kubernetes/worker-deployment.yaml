@@ -1,19 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: worker
-  name: worker
+  name: worker-deployment
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: worker
   template:
     metadata:
+      name: worker
       labels:
         app: worker
     spec:
       containers:
-      - image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/worker
-        name: worker
+        - image: europe-west9-docker.pkg.dev/login-projet-420022/voting-image/worker
+          name: worker
+  selector:
+    matchLabels:
+      app: worker
