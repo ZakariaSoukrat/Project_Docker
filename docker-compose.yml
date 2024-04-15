@@ -4,8 +4,6 @@ services:
   nginx:
     image: europe-west9-docker.pkg.dev/login-k8s-416409/voting-images/voting-image/nginx
     build: ./nginx
-    ports:
-      - "80:80"
     depends_on:
       - vote1
       - vote2
